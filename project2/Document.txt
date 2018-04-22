@@ -1,0 +1,2 @@
+/home/ioanna/Documents/Syspro/ena.txt
+/home/ioanna/Documents/Syspro/duo.txt
