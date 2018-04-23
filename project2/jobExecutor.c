@@ -35,10 +35,9 @@ int main(int argc,char* argv[]){
   int out_father[w];
   DIR *d;
   struct dirent *dir;
-  d = opendir(doc);
   pid_t pids[w];
   int ch=0, lines=0, ret;
-  size_t size= 512;
+  size_t size= 1024;
 
 ////////////////////////////////////////////////////////////////////////
   FILE *fp = fopen(doc, "r");
@@ -53,8 +52,6 @@ int main(int argc,char* argv[]){
       lines++;
     }
   }
-  //printf("LINES %d\n",lines );
-
   buffer= malloc(sizeof(char) *size);     //just to read
   char **array;
   array = malloc(sizeof(char*)*lines);    //just to save the lines
@@ -94,6 +91,10 @@ if (lines%w != 0){
 }
 ////////////////////////////////////////////////////////////////////////
 
+if(numdocs == 0){
+    printf("Some kids does not take paths (num of kids:)%d\n",(w-lines) );
+    w = lines;
+}
 
   char Input_parent[24];
   char Output_parent[24];
@@ -125,6 +126,7 @@ if (lines%w != 0){
         if(id < docsdiv){
           child_numdocs++;
         }
+        if(child_numdocs==0)return 0;
         printf("i am child %d  with docs %d\n",id,child_numdocs);
         char** my_paths;
         my_paths = malloc(sizeof(char*)*child_numdocs);
@@ -144,7 +146,7 @@ if (lines%w != 0){
         for(i = 0 ; i < child_numdocs ; i++){    //gia osa paths prepei na diavasei
           while (read ( in , msgbuf , BUFSIZE +1) <=0);
           printf("PATH :%s  %d \n",msgbuf,id );
-          my_paths[i] = malloc(sizeof(char)*strlen(msgbuf));
+          my_paths[i] = malloc(sizeof(char)*strlen(msgbuf)+1);
           strcpy(my_paths[i],msgbuf);
           write(out,"NextPath",strlen("NextPath")+1);
 
@@ -211,7 +213,7 @@ if (lines%w != 0){
           }
         }
 
-
+        printf("id %d    to while\n",id );
         while(1){
           if (  read ( in, msgbuf, BUFSIZE +1) > 0){
             if(!strcmp(msgbuf,"/exit")){
@@ -282,12 +284,6 @@ if (lines%w != 0){
     }
   }
 
-  // for(i = 0 ; i <w ; i++){
-  //   if (( nwrite = write ( out_father[i] ,"exit" , strlen("exit")+1) ) == -1){
-  //     perror ( " Error in Writing 2" ) ;
-  //     exit (2) ;
-  //   }
-  // }
   for( j= 0 ; j < lines ; j++){
     free(array[j]);
   }
@@ -296,63 +292,49 @@ if (lines%w != 0){
 ////////////////////////////////////////////////////////////////////////
   fp = stdin;
   char* tempWord;
-  while (!feof(fp)){
+  while (1){
     ret = getline(&buffer, &size, fp);      //reading from stdin
-    if (ret<0)
-      break;
+    if (ret<0)break;
     buffer[ret-1]= '\0';
 
     tempWord = strtok(buffer," ");
-    if(!strcmp(buffer,"/exit")){
-      for(i=0 ; i<w ; i++){
-        if (( nwrite = write ( out_father[i] ,"/exit" , strlen("/exit")+1) ) == -1){
-          perror ("Error in Writing 5");
-          exit (2) ;
-        }
-        /* Wait for children to exit. */
-        int status;
-        pid_t pid;
-        for(i = 0  ; i < w ; i++){
-          printf("Waiting: %d\n",waitpid(pids[i],&status,0));
-        }
-
-        for(i = 0 ; i < w ; i++){
-          sprintf(Input_parent, "Input%d", i);
-          sprintf(Output_parent,"Output%d",i);
-          if (remove(Input_parent) != 0)
-            printf("Unable to delete the file");
-          if (remove(Output_parent) != 0)
-            printf("Unable to delete the file");
-        }
-        free(doc);
-        free(buffer);
-        break;
-      }
-    }else if(!strcmp(buffer,"/search")){
-
+    if(tempWord==NULL){
+        printf("wrong in input\n" );
+        continue ;
     }
-    return 0;
+    if(!strcmp(tempWord,"/search")){
+
+    }else if(!strcmp(buffer,"/exit")){
+        for(i=0 ; i<w ; i++){
+            printf("give exit%d   %d\n",i ,w);
+            if (( nwrite = write ( out_father[i] ,"/exit" , strlen("/exit")+1) ) == -1){
+                perror ("Error in Writing 5");
+                exit (2) ;
+            }
+        }
+        break;
+    }else{
+        printf("wrong command\n" );
+        continue ;
+    }
   }
 
+  int status;
+  /* Wait for children to exit. */
+  for(i = 0  ; i < w ; i++){
+      printf("Waiting: %d\n",waitpid(pids[i],&status,0));
+  }
 
+  for(i = 0 ; i < w ; i++){
+      sprintf(Input_parent, "Input%d", i);
+      sprintf(Output_parent,"Output%d",i);
+      if (remove(Input_parent) != 0)
+      printf("Unable to delete the file");
+      if (remove(Output_parent) != 0)
+      printf("Unable to delete the file");
+  }
+  free(doc);
+  free(buffer);
+return 0;
 
-////////////////////////////////////////////////////////////////////////
-
-  // /* Wait for children to exit. */
-  // int status;
-  // pid_t pid;
-  // for(i = 0  ; i < w ; i++){
-  //   printf("Waiting: %d\n",waitpid(pids[i],&status,0));
-  // }
-  //
-  // for(i = 0 ; i < w ; i++){
-  //   sprintf(Input_parent, "Input%d", i);
-  //   sprintf(Output_parent,"Output%d",i);
-  //   if (remove(Input_parent) != 0)
-  //     printf("Unable to delete the file");
-  //   if (remove(Output_parent) != 0)
-  //     printf("Unable to delete the file");
-  // }
-  // free(doc);
-  // free(buffer);
 }
