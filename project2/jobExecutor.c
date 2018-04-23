@@ -3,8 +3,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "Arguments.h"
-#include "trie.h"
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -12,6 +10,8 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include "Arguments.h"
+#include "trie.h"
 #define BUFSIZE 1024
 
 
@@ -139,6 +139,8 @@ if (lines%w != 0){
             exit(1);
         }
 
+        TrieNode *trie= createTrieNode('\0'); /////////////////////////////////////////////
+
         for(i = 0 ; i < child_numdocs ; i++){    //gia osa paths prepei na diavasei
           while (read ( in , msgbuf , BUFSIZE +1) <=0);
           printf("PATH :%s  %d \n",msgbuf,id );
@@ -147,51 +149,71 @@ if (lines%w != 0){
           write(out,"NextPath",strlen("NextPath")+1);
 
           //open .txt files
-          char *txtname, *token;
-          int j, tmpr;
-          //txtname= malloc(sizeof(char)*size);
-
-          char* doctxt;
-          strcpy(doctxt,my_paths[i]);
-          d = opendir(doctxt);
+          char* doc= my_paths[i];
+          char *txtname;
+          txtname= malloc(sizeof(char)*size+1);
+          d = opendir(doc);
           if (d) {
             //printf("%s\n",buffer );
 
             while ((dir = readdir(d)) != NULL) {
               if (strcmp(dir->d_name,".") && strcmp(dir->d_name,"..")){
-                printf("TXT NAME: %s\n", dir->d_name);
-                //////////////////////////////////
-                FILE *tmpfile = fopen(dir->d_name, "r");
-                  if (tmpfile == NULL){
-                      fprintf(stderr,"Error opening file\n");
-                      exit(-1);
-                  }
+                strcpy(txtname, dir->d_name);
+                printf("TXT NAME: %s\n", txtname);
 
-                while(!feof(tmpfile)){
-                  ch = fgetc(tmpfile);
-                  if(ch == '\n'){
+                /////edo prospathw na anoiksw ta arxeiakia/////
+                char* pathtxt;
+                pathtxt= malloc(sizeof(char)*size);
+                strcpy(pathtxt, my_paths[i]);
+                strcat(pathtxt,txtname);
+                //EXW STO PATH TXT KATHE PATH GIA TA arxeiakia
+                int linestxt=0, ch2;
+                FILE *fp2 = fopen(pathtxt, "r");
+                    if (fp2 == NULL){
+                        fprintf(stderr,"Error opening file\n");
+                        exit(-1);
+                    }
+
+                while(!feof(fp2)){
+                  ch2 = fgetc(fp2);
+                  if(ch2 == '\n'){
                     linestxt++;
                   }
-                }//endofwhile(feof)
+                }
+                printf("LINES %d\n",linestxt);
 
-                for( j=0; j<linestxt; j++){
-                  tmpr= getline(&buffer, &size, tmpfile);     //takes whole line
-                  if (tmpr<0)                            //if line ended
-                    break;
+                char **arraytxt, *token;
+                int ret2, k;
+                arraytxt = malloc(sizeof(char*)*linestxt);    //just to save the lines
 
-                  buffer[ret-1]= '\0';
-                  token= strtok(buffer, " ");
-                  while (buffer!= "\n"){
-                    printf("STRTOKED %s\n",token );
-                    token= strtok(NULL," ");
-                  }
+                fseek(fp2, 0, SEEK_SET); //go to the top of file
+                for(k=0; k<linestxt; k++){
+                  ret2 = getline(&buffer, &size, fp2);
+                    if (ret2<0)                            //if line ended
+                      break;
+
+                    buffer[ret2-1]= '\0' ;
+                    arraytxt[k] = malloc(sizeof(char )* strlen(buffer)+1);
+                    strcpy(arraytxt[k], buffer);
+                    //printf("DES EDO %s\n",arraytxt[k]);
+
+                    token= strtok(arraytxt[k]," ");
+                    //printf("TOKEN1: %s\n", token);
+                    while (token != NULL){
+                      printf("TOKEN %s\n",token);
+                      token= strtok(NULL," ");
+                    }
                 }
 
-              }
-            }//fclose(tmpfile);
+
+
+
+              }//END OF IF . ..
+            }//END OF WHILE
             closedir(d);
           }
         }
+
 
         while(1){
           if (  read ( in , msgbuf , BUFSIZE +1) > 0) {
@@ -270,6 +292,24 @@ if (lines%w != 0){
     free(array[j]);
   }
   free(array);
+
+////////////////////////////////////////////////////////////////////////
+  fp = stdin;
+  char* tempWord;
+  while (!feof(fp)){
+    ret = getline(&buffer, &size, fp);      //reading from stdin
+    if (ret<0)
+      break;
+    buffer[ret-1]= '\0';
+
+    tempWord = strtok(buffer," ");
+    if(!strcmp(buffer,"/exit")){
+      //printf("BYE\n" );
+      break;
+    }
+  }
+
+
 
 ////////////////////////////////////////////////////////////////////////
 
