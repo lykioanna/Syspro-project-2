@@ -331,8 +331,8 @@ if (lines%w != 0){
     }else if(!strcmp(buffer,"/search")){
 
     }
+    return 0;
   }
-  return 0;
 
 
 
