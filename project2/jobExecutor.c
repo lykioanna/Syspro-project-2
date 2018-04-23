@@ -200,14 +200,11 @@ if (lines%w != 0){
                     token= strtok(arraytxt[k]," ");
                     //printf("TOKEN1: %s\n", token);
                     while (token != NULL){
-                      printf("TOKEN %s\n",token);
+                      //printf("TOKEN %s\n",token);
+                      //INSERT TRIE KTL
                       token= strtok(NULL," ");
                     }
                 }
-
-
-
-
               }//END OF IF . ..
             }//END OF WHILE
             closedir(d);
@@ -216,8 +213,11 @@ if (lines%w != 0){
 
 
         while(1){
-          if (  read ( in , msgbuf , BUFSIZE +1) > 0) {
-            if(!strcmp(msgbuf,"exit"))break;
+          if (  read ( in, msgbuf, BUFSIZE +1) > 0){
+            if(!strcmp(msgbuf,"/exit")){
+              printf("DES EDO\n" );
+              break;
+            }
           }
         }
 
@@ -282,12 +282,12 @@ if (lines%w != 0){
     }
   }
 
-  for(i = 0 ; i <w ; i++){
-    if (( nwrite = write ( out_father[i] ,"exit" , strlen("exit")+1) ) == -1){
-      perror ( " Error in Writing 2" ) ;
-      exit (2) ;
-    }
-  }
+  // for(i = 0 ; i <w ; i++){
+  //   if (( nwrite = write ( out_father[i] ,"exit" , strlen("exit")+1) ) == -1){
+  //     perror ( " Error in Writing 2" ) ;
+  //     exit (2) ;
+  //   }
+  // }
   for( j= 0 ; j < lines ; j++){
     free(array[j]);
   }
@@ -304,30 +304,55 @@ if (lines%w != 0){
 
     tempWord = strtok(buffer," ");
     if(!strcmp(buffer,"/exit")){
-      //printf("BYE\n" );
-      break;
+      for(i=0 ; i<w ; i++){
+        if (( nwrite = write ( out_father[i] ,"/exit" , strlen("/exit")+1) ) == -1){
+          perror ("Error in Writing 5");
+          exit (2) ;
+        }
+        /* Wait for children to exit. */
+        int status;
+        pid_t pid;
+        for(i = 0  ; i < w ; i++){
+          printf("Waiting: %d\n",waitpid(pids[i],&status,0));
+        }
+
+        for(i = 0 ; i < w ; i++){
+          sprintf(Input_parent, "Input%d", i);
+          sprintf(Output_parent,"Output%d",i);
+          if (remove(Input_parent) != 0)
+            printf("Unable to delete the file");
+          if (remove(Output_parent) != 0)
+            printf("Unable to delete the file");
+        }
+        free(doc);
+        free(buffer);
+        break;
+      }
+    }else if(!strcmp(buffer,"/search")){
+
     }
   }
+  return 0;
 
 
 
 ////////////////////////////////////////////////////////////////////////
 
-  /* Wait for children to exit. */
-  int status;
-  pid_t pid;
-  for(i = 0  ; i < w ; i++){
-    printf("Waiting: %d\n",waitpid(pids[i],&status,0));
-  }
-
-  for(i = 0 ; i < w ; i++){
-    sprintf(Input_parent, "Input%d", i);
-    sprintf(Output_parent,"Output%d",i);
-    if (remove(Input_parent) != 0)
-      printf("Unable to delete the file");
-    if (remove(Output_parent) != 0)
-      printf("Unable to delete the file");
-  }
-  free(doc);
-  free(buffer);
+  // /* Wait for children to exit. */
+  // int status;
+  // pid_t pid;
+  // for(i = 0  ; i < w ; i++){
+  //   printf("Waiting: %d\n",waitpid(pids[i],&status,0));
+  // }
+  //
+  // for(i = 0 ; i < w ; i++){
+  //   sprintf(Input_parent, "Input%d", i);
+  //   sprintf(Output_parent,"Output%d",i);
+  //   if (remove(Input_parent) != 0)
+  //     printf("Unable to delete the file");
+  //   if (remove(Output_parent) != 0)
+  //     printf("Unable to delete the file");
+  // }
+  // free(doc);
+  // free(buffer);
 }
