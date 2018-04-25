@@ -4,6 +4,7 @@
 typedef struct ListNode{
   int id;
   int freq;
+  char* path;
   struct ListNode *next;
 }ListNode;
 
@@ -15,14 +16,14 @@ typedef struct TrieNode{
   struct ListNode *postList;
 }TrieNode;
 
-ListNode *createListNode(int id );
-void insertList(ListNode *root, int id);
+ListNode *createListNode(char* path, int id);
+void insertList(ListNode *root, char* path, int id);
 void cleanList(ListNode * myList);
 
 
 TrieNode *createTrieNode(char c);
 // void insertTrieNode(TrieNode *node, char ch);
-void insertTrie(TrieNode *root, char *word,int doc_id);
+void insertTrie(TrieNode *root, char *word,char* path, int doc_id);
 ListNode* searchTrie(TrieNode *root, char* key);
 void cleanTrie(TrieNode **root);
 void printAll(TrieNode *root,char* word, int i);

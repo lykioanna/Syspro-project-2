@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <dirent.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <fcntl.h>
-#include <string.h>
+#include <dirent.h>
 #include <errno.h>
 #include "Arguments.h"
 #include "trie.h"
@@ -67,21 +66,7 @@ int main(int argc,char* argv[]){
       buffer[ret-1]= '\0' ;
       array[i] = malloc(sizeof(char )* strlen(buffer)+1);
       strcpy(array[i], buffer);
-      //printf("Array's: %s \n",array[i]);
 
-      // char* doc= buffer;
-      // d = opendir(doc);
-      // if (d) {
-      //   printf("%s\n",buffer );
-      //
-      //   while ((dir = readdir(d)) != NULL) {
-      //     printf("TXT NAME: %s\n", dir->d_name);
-      //   }
-      //   closedir(d);
-      // }
-
-      //ret= getline(&buffer, &size, fp);     //takes whole line
-      //}
   }
   fclose(fp);
 ////////////////////////////////////////////////////////////////////////
@@ -120,7 +105,8 @@ if(numdocs == 0){
 
     } else if (pids[i] == 0){
 ////////////////////////////////////////////////////////////////////////
-        //CHILD//
+
+//CHILD//
         char msgbuf[BUFSIZE];
         int in,out,child_numdocs=numdocs,id=i, linestxt=0;
         if(id < docsdiv){
@@ -141,7 +127,8 @@ if(numdocs == 0){
             exit(1);
         }
 
-        TrieNode *trie= createTrieNode('\0'); /////////////////////////////////////////////
+
+        //TrieNode *trie= createTrieNode('\0');
 
         for(i = 0 ; i < child_numdocs ; i++){    //gia osa paths prepei na diavasei
           while (read ( in , msgbuf , BUFSIZE +1) <=0);
@@ -182,6 +169,7 @@ if(numdocs == 0){
                     linestxt++;
                   }
                 }
+                //GIA KATHE ARXEIAKI//
                 printf("LINES %d\n",linestxt);
 
                 char **arraytxt, *token;
@@ -204,6 +192,8 @@ if(numdocs == 0){
                     while (token != NULL){
                       //printf("TOKEN %s\n",token);
                       //INSERT TRIE KTL
+                      //("PATH TXT%s\n",pathtxt);
+                      //insertTrie(trie, token,pathtxt, k);
                       token= strtok(NULL," ");
                     }
                 }
@@ -213,19 +203,36 @@ if(numdocs == 0){
           }
         }
 
-        printf("id %d    to while\n",id );
+        //printf("id %d    to while\n",id );
+        ///////////////////////////////////////
+        char *logtxt;
+        sprintf(logtxt,"./Log/Worker_%d.txt",id);
+        FILE *f3 = fopen(logtxt, "w");
+        if (f3 == NULL){
+          fprintf(stderr,"Error opening file f3\n");
+          exit(-1);
+        }
+        const char *text = "Write this to the file";
+        fprintf(f3, "Some text: %s\n", text);
+        fclose(f3);
+        ////////////////////////////////////////
+
         while(1){
           if (  read ( in, msgbuf, BUFSIZE +1) > 0){
             if(!strcmp(msgbuf,"/exit")){
-              printf("DES EDO\n" );
               break;
             }
           }
         }
-
+        // ListNode* temp = searchTrie(trie,"tria!");
+        // if(temp!=NULL){
+        //   printf("I found it at %s\n",temp->path );
+        // }
         for(i=0 ; i < child_numdocs ; i++){
           free(my_paths[i]);
         }
+
+        //cleanTrie(&trie);
         free(my_paths);
         printf("child finished\n" );
         return 0;

@@ -3,17 +3,18 @@
 #include <stdlib.h>
 #include "trie.h"
 
-ListNode *createListNode(int id){
+ListNode *createListNode(char* path, int id){
   ListNode *mynode;
   mynode= malloc(sizeof(ListNode));
   mynode->id= id;
   mynode->freq= 1;
   mynode->next= NULL;
-
+  mynode->path = malloc(sizeof(char)*strlen(path)+1);
+  strcpy(mynode->path,path);
   return mynode;
 }
 
-void insertList(ListNode *root, int id){
+void insertList(ListNode *root,char* path, int id){
   ListNode *temp= root;
   if(root == NULL ){
     printf("ERROR IN insertList\n" );
@@ -30,7 +31,7 @@ void insertList(ListNode *root, int id){
       return;
     }
   }
-  temp->next= createListNode(id);
+  temp->next= createListNode(path,id);
 
 }
 
@@ -40,6 +41,7 @@ void cleanList(ListNode * myList){
   do{
     myList = temp;
     temp = myList->next;
+    free(myList->path);
     free(myList);
   }while(temp!=NULL);
 
@@ -61,7 +63,7 @@ TrieNode *createTrieNode(char ch){
 
 
 ////sta children   katheta-
-void insertTrie(TrieNode *root, char *word,int doc_id){
+void insertTrie(TrieNode *root, char *word,char* path,int doc_id){
   TrieNode *tempNode= root;
   int i=0;
   for (i=0; i< strlen(word); i++){
@@ -106,9 +108,9 @@ void insertTrie(TrieNode *root, char *word,int doc_id){
     }
   }
   if(tempNode-> postList==NULL)
-    tempNode-> postList = createListNode(doc_id);
+    tempNode-> postList = createListNode(path,doc_id);
   else
-    insertList(tempNode->postList,doc_id);
+    insertList(tempNode->postList,path,doc_id);
 }
 
 //* giati thelw na gyrnaei dieuthinsi oxi antigrafo listas
