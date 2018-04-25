@@ -189,7 +189,7 @@ if(numdocs == 0){
                     token= strtok(arraytxt[k]," ");
                     //printf("TOKEN1: %s\n", token);
                     while (token != NULL){
-                      printf("TOKEN %s\n",token);
+                      //printf("TOKEN %s\n",token);
                       //INSERT TRIE KTL
                       ("PATH TXT%s\n",pathtxt);
                       insertTrie(trie, token,pathtxt, k);
@@ -201,7 +201,7 @@ if(numdocs == 0){
                 fclose(fp2);
                 free(arraytxt);
                 free(pathtxt);
-              }//END OF IF . ..
+              }//END OF IF . .
             }//END OF WHILE
             closedir(d);
           }
@@ -225,6 +225,11 @@ if(numdocs == 0){
           if (  read ( in, msgbuf, BUFSIZE +1) > 0){
             if(!strcmp(msgbuf,"/exit")){
               break;
+            }else if(!strcmp(msgbuf,"/search")){
+              if(read(in_father[i],msgbuf,BUFSIZE)>0){
+                printf("to minima %s\n",msgbuf);
+              }
+              printf("EFTASAAAAAAAAA\n" );
             }
           }
         }
@@ -303,17 +308,32 @@ if(numdocs == 0){
 ////////////////////////////////////////////////////////////////////////
   fp = stdin;
   char* tempWord;
+  tempWord= malloc(sizeof(char)*size);
+  char* test;
   while (1){
     ret = getline(&buffer, &size, fp);      //reading from stdin
     if (ret<0)break;
     buffer[ret-1]= '\0';
 
     tempWord = strtok(buffer," ");
-    if(tempWord==NULL){
+    if(buffer==NULL){
         printf("wrong in input\n" );
         continue ;
     }
-    if(!strcmp(tempWord,"/search")){
+    if(!strcmp(buffer,"/search")){
+      for( i=0; i<w; i++){
+        if (( nwrite = write ( out_father[i] ,buffer , strlen(buffer)+1) ) == -1){
+            perror ("Error in Writing 6");
+            exit (2) ;
+        }
+        printf("ELEOS\n" );
+        tempWord= strtok(NULL,"");
+        if (( nwrite = write ( out_father[i] , tempWord, strlen(tempWord)+1) ) == -1){
+            perror ("Error in Writing 6");
+            exit (2) ;
+        }
+
+      }
 
     }else if(!strcmp(buffer,"/exit")){
         for(i=0 ; i<w ; i++){
