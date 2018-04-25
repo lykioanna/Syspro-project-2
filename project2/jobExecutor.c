@@ -128,7 +128,7 @@ if(numdocs == 0){
         }
 
 
-        //TrieNode *trie= createTrieNode('\0');
+        TrieNode *trie= createTrieNode('\0');
 
         for(i = 0 ; i < child_numdocs ; i++){    //gia osa paths prepei na diavasei
           while (read ( in , msgbuf , BUFSIZE +1) <=0);
@@ -143,7 +143,6 @@ if(numdocs == 0){
           txtname= malloc(sizeof(char)*size+1);
           d = opendir(doc);
           if (d) {
-            //printf("%s\n",buffer );
 
             while ((dir = readdir(d)) != NULL) {
               if (strcmp(dir->d_name,".") && strcmp(dir->d_name,"..")){
@@ -190,13 +189,18 @@ if(numdocs == 0){
                     token= strtok(arraytxt[k]," ");
                     //printf("TOKEN1: %s\n", token);
                     while (token != NULL){
-                      //printf("TOKEN %s\n",token);
+                      printf("TOKEN %s\n",token);
                       //INSERT TRIE KTL
-                      //("PATH TXT%s\n",pathtxt);
-                      //insertTrie(trie, token,pathtxt, k);
+                      ("PATH TXT%s\n",pathtxt);
+                      insertTrie(trie, token,pathtxt, k);
+
                       token= strtok(NULL," ");
                     }
+                    free(arraytxt[k]);
                 }
+                fclose(fp2);
+                free(arraytxt);
+                free(pathtxt);
               }//END OF IF . ..
             }//END OF WHILE
             closedir(d);
@@ -205,7 +209,7 @@ if(numdocs == 0){
 
         //printf("id %d    to while\n",id );
         ///////////////////////////////////////
-        char *logtxt;
+        char *logtxt = malloc(sizeof(char)*strlen("./Log/Worker_.txt")+10);
         sprintf(logtxt,"./Log/Worker_%d.txt",id);
         FILE *f3 = fopen(logtxt, "w");
         if (f3 == NULL){
@@ -224,15 +228,15 @@ if(numdocs == 0){
             }
           }
         }
-        // ListNode* temp = searchTrie(trie,"tria!");
-        // if(temp!=NULL){
-        //   printf("I found it at %s\n",temp->path );
-        // }
+        ListNode* temp = searchTrie(trie,"tria!");
+        if(temp!=NULL){
+          printf("I found it at %s\n",temp->path );
+        }
         for(i=0 ; i < child_numdocs ; i++){
           free(my_paths[i]);
         }
-
-        //cleanTrie(&trie);
+        cleanTrie(&trie);
+        free(logtxt);
         free(my_paths);
         printf("child finished\n" );
         return 0;
