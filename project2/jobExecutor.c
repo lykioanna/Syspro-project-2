@@ -220,16 +220,17 @@ if(numdocs == 0){
         fprintf(f3, "Some text: %s\n", text);
         fclose(f3);
         ////////////////////////////////////////
-
+        char* tempWord;
         while(1){
           if (  read ( in, msgbuf, BUFSIZE +1) > 0){
-            if(!strcmp(msgbuf,"/exit")){
+              tempWord = strtok(msgbuf," ");
+
+            if(!strcmp(tempWord,"/exit")){
               break;
-            }else if(!strcmp(msgbuf,"/search")){
-              if(read(in_father[i],msgbuf,BUFSIZE)>0){
-                printf("to minima %s\n",msgbuf);
-              }
-              printf("EFTASAAAAAAAAA\n" );
+          }else if(!strcmp(tempWord,"/search")){
+              tempWord = strtok(NULL, "");
+              printf("the words search %s \n", tempWord);
+              write(out,"SearchOk",strlen("SearchOk")+1);
             }
           }
         }
@@ -308,34 +309,41 @@ if(numdocs == 0){
 ////////////////////////////////////////////////////////////////////////
   fp = stdin;
   char* tempWord;
-  tempWord= malloc(sizeof(char)*size);
+  char* tempCommand;
   char* test;
   while (1){
     ret = getline(&buffer, &size, fp);      //reading from stdin
     if (ret<0)break;
-    buffer[ret-1]= '\0';
-
-    tempWord = strtok(buffer," ");
     if(buffer==NULL){
         printf("wrong in input\n" );
         continue ;
     }
-    if(!strcmp(buffer,"/search")){
+    buffer[ret-1]= '\0';
+    tempCommand = malloc(sizeof(char)*strlen(buffer)+1);
+    strcpy(tempCommand,buffer);
+    tempWord = strtok(tempCommand," ");
+
+    if(!strcmp(tempWord,"/search")){
       for( i=0; i<w; i++){
         if (( nwrite = write ( out_father[i] ,buffer , strlen(buffer)+1) ) == -1){
             perror ("Error in Writing 6");
             exit (2) ;
         }
-        printf("ELEOS\n" );
-        tempWord= strtok(NULL,"");
-        if (( nwrite = write ( out_father[i] , tempWord, strlen(tempWord)+1) ) == -1){
-            perror ("Error in Writing 6");
-            exit (2) ;
-        }
-
+      }
+      counter_rec= 0 ;
+      while(1){
+          for(i = 0 ; i < w ; i++){        //kai edw apantoun ta paidia oti diavasan to upoloipa paths
+              if(read(in_father[i],msgbuf,BUFSIZE)>0){
+                  if(!strcmp(msgbuf,"SearchOk")){
+                      counter_rec++;
+                  }
+              }
+          }
+          if(counter_rec == w)break;
       }
 
     }else if(!strcmp(buffer,"/exit")){
+        free(tempCommand);
         for(i=0 ; i<w ; i++){
             printf("give exit%d   %d\n",i ,w);
             if (( nwrite = write ( out_father[i] ,"/exit" , strlen("/exit")+1) ) == -1){
@@ -346,8 +354,10 @@ if(numdocs == 0){
         break;
     }else{
         printf("wrong command\n" );
+        free(tempCommand);
         continue ;
     }
+    free(tempCommand);
   }
 
   int status;
