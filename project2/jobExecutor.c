@@ -221,6 +221,10 @@ if(numdocs == 0){
         fclose(f3);
         ////////////////////////////////////////
         char* tempWord;
+        char* token2, *words;
+        words= malloc(sizeof(char)*size);
+        token2= malloc(sizeof(char)*size);
+        ListNode *result;
         while(1){
           if (  read ( in, msgbuf, BUFSIZE +1) > 0){
               tempWord = strtok(msgbuf," ");
@@ -229,19 +233,34 @@ if(numdocs == 0){
               break;
           }else if(!strcmp(tempWord,"/search")){
               tempWord = strtok(NULL, "");
-              printf("the words search %s \n", tempWord);
+              strcpy(words, tempWord);
+              token2=strtok(words," ");
+              while (token2!=NULL) {
+                printf("Mpika sto search\n");
+                result= searchTrie(trie, token2);
+                printf("ID %d PATH %s \n",result->id, result->path);
+                token2= strtok(NULL," ");
+              }
               write(out,"SearchOk",strlen("SearchOk")+1);
             }
           }
         }
+
+
         ListNode* temp = searchTrie(trie,"tria!");
         if(temp!=NULL){
           printf("I found it at %s\n",temp->path );
         }
+
+
+
+
         for(i=0 ; i < child_numdocs ; i++){
           free(my_paths[i]);
         }
         cleanTrie(&trie);
+        free(words);
+        free(token2);
         free(logtxt);
         free(my_paths);
         printf("child finished\n" );
