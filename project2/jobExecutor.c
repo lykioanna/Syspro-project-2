@@ -191,8 +191,7 @@ if(numdocs == 0){
                     while (token != NULL){
                       //printf("TOKEN %s\n",token);
                       //INSERT TRIE KTL
-                      ("PATH TXT%s\n",pathtxt);
-                      insertTrie(trie, token,pathtxt, k);
+                      insertTrie(trie, token,pathtxt, (k+1));
 
                       token= strtok(NULL," ");
                     }
@@ -238,22 +237,16 @@ if(numdocs == 0){
               while (token2!=NULL) {
                 printf("Mpika sto search\n");
                 result= searchTrie(trie, token2);
-                printf("ID %d PATH %s \n",result->id, result->path);
+                while(result!=NULL){
+                    printf("ID %d PATH %s \n",result->id, result->path);
+                    result= result->next;
+                }
                 token2= strtok(NULL," ");
               }
               write(out,"SearchOk",strlen("SearchOk")+1);
             }
           }
         }
-
-
-        ListNode* temp = searchTrie(trie,"tria!");
-        if(temp!=NULL){
-          printf("I found it at %s\n",temp->path );
-        }
-
-
-
 
         for(i=0 ; i < child_numdocs ; i++){
           free(my_paths[i]);

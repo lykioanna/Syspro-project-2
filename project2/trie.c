@@ -5,6 +5,8 @@
 
 ListNode *createListNode(char* path, int id){
   ListNode *mynode;
+
+  // printf("aaaa   %s\n",path );
   mynode= malloc(sizeof(ListNode));
   mynode->id= id;
   mynode->freq= 1;
@@ -20,16 +22,8 @@ void insertList(ListNode *root,char* path, int id){
     printf("ERROR IN insertList\n" );
     return;
   }
-  if(temp->id == id){
-    temp->freq++;
-    return;
-  }
   while(temp->next!=NULL){
     temp=temp->next;
-    if(temp->id == id){
-      temp->freq++;
-      return;
-    }
   }
   temp->next= createListNode(path,id);
 
@@ -122,9 +116,9 @@ ListNode* searchTrie(TrieNode *root, char* word){
 
     while (tempNode != NULL){
         if (tempNode->c == word[i]){
-          printf("%c",tempNode->c );
+          // printf("%c",tempNode->c );
           if (tempNode->postList !=NULL && i==strlen(word)-1){
-            printf("\nWord found\n" );
+        // /    printf("\nWord found\n" );
             return tempNode->postList;
             temp= tempNode->postList;
           }
@@ -138,7 +132,7 @@ ListNode* searchTrie(TrieNode *root, char* word){
 
       }
     }
-    printf("\nWord not found\n");
+    // printf("\nWord not found\n");
     return NULL;
   }
 
